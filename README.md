@@ -9,7 +9,7 @@ Project made for Bachelor's Thesis
   -Controller to any device that takes keyboard input (just use your laptop or pc)
   -SensorPlatform to RaspberryPi or adjacent device (tested on RPi 4, refer to wiring diagram for components)
 
-2.Install missing libraries and dependencies(check docs)
+2.Install missing libraries and dependencies (Gstreamer and libcamera for videostream)
 
 3.Setup an mqtt broker
 
