@@ -51,24 +51,23 @@ class SenseHatWrapper(Component):
             self.sense.set_pixel(x, y, r, g, b)
     
     
-    def setProximityLED(self, proximity) - None:
+    def setProximityLED(self, proximity) -> None:
         """Set proximity light state"""
+
+        if proximity:
+            # Determine the color based on the proximity value
+            if proximity < 10:
+                r, g, b = self.ledBrightness, 0, 0  # Red
+            elif proximity < 20:
+                r, g, b = self.ledBrightness, self.ledBrightness, 0  # Yellow
+            else:
+                r, g, b = 0, self.ledBrightness, 0  # Green
+
+            for y in range(8):
+                self.sense.set_pixel(0, y, r, g, b)
+                self.sense.set_pixel(1, y, r, g, b)
+
         
-        leds = self.sense.get_pixels()
-
-        # Determine the color based on the proximity value
-        if proximity < 10:
-            r, g, b = self.ledBrightness, 0, 0  # Red
-        elif proximity < 20:
-            r, g, b = self.ledBrightness, self.ledBrightness, 0  # Yellow
-        else:
-            r, g, b = 0, self.ledBrightness, 0  # Green
-
-        for y in range(8):
-            self.sense.set_pixel(0, y, r, g, b)
-            self.sense.set_pixel(1, y, r, g, b)
-
-      
     def getReading(self, data) -> dict:
         """Get Environmental sensor readings"""
         

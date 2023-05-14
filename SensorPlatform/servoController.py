@@ -31,7 +31,7 @@ class ServoController(Component):
         print("PWM 1 stopped")
         
  
-    def setServoState(self, state: list, setIdle = False) -> None:
+    def setServoState(self, state: list = [7.5, 7.5], setIdle = False) -> None:
         """Set duty cycle, [n.n, n.n]"""
         
         if not setIdle:

@@ -26,32 +26,30 @@ class DistanceSensor(Component):
     def getReading(self, msg = None) -> float:
         """Get distance reading in cm"""
         
+        time.sleep(0.05)  # sensor settle
+        
         GPIO.output(self.trig, True)
         time.sleep(0.00001)
         GPIO.output(self.trig, False)
         
-        startTime: float = time.time()
-        stopTime: float = time.time()
+        initialTime: float = time.time()  # Track the initial time
         timeout: float = 0.04  # Maximum range for HC-SR04 is 4m. 4m / 343m/s = ~0.0116s, so 0.04s is a safe timeout
         
         # Save start time
         while GPIO.input(self.echo) == 0:
             startTime = time.time()
-            if startTime - stopTime >= timeout:
+            if startTime - initialTime >= timeout:  # Use the initial time for the timeout check
                 return None  # Timeout, return None
 
         # Save time of arrival
         while GPIO.input(self.echo) == 1:
             stopTime = time.time()
-            if stopTime - startTime >= timeout:
+            if stopTime - initialTime >= timeout:  # Use the initial time for the timeout check
                 return None  # Timeout, return None
 
         timeElapsed: float = stopTime - startTime
         distance: float = (timeElapsed * 34300) / 2
-        
-        if not distance:
-            distance = 0.0
-        
+
         if msg:
             return {"timestamp": super().getTime(),
                     "distance" : distance}

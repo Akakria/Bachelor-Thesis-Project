@@ -1,9 +1,10 @@
 import paho.mqtt.client as mqtt
 import json
+from utils import terminate
 
 
 class MqttClient(): 
-    def __init__(self, duty, sensors, stream, terminate, config, terminationEvent) -> None: 
+    def __init__(self, duty, sensors, stream, config, terminationEvent, terminate = terminate) -> None: 
         self.actions =\
         {
                 "operator/action/duty" : duty,
@@ -39,13 +40,12 @@ class MqttClient():
   
     def onMessage(self, client, userdata, msg):
         topic = msg.topic
-        payload = json.loads(msg.payload.decode("utf-8"))   
+        payload = json.loads(msg.payload.decode("utf-8")) 
+        action = self.actions[topic](payload)  
         
         if topic == "operator/action/terminate" and payload["action"] == 1:
             self.terminationEvent.set()
-        else:
-            action = self.actions[topic](payload)
-            
+ 
         if action: #TODO: implement multiple response topics handling
             self.publish(self.responses, action)
             

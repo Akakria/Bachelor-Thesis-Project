@@ -1,7 +1,7 @@
 import time
 import traceback
 import threading
-from utils import terminate, shutdown
+from utils import shutdown
 from configuration import Configuration
 from servoController import ServoController
 from distanceSensor import DistanceSensor
@@ -11,14 +11,15 @@ from streamManager import StreamManager
 
    
 def main():
-    terminationEvent = threading.Event()
-    streamManager = StreamManager()
-    config = Configuration()
     
-    senseHatWrapper = SenseHatWrapper()
+    terminationEvent = threading.Event() #deals with thread termination
+    streamManager = StreamManager() #manages GStreamer subprocess
+    config = Configuration() #program configuration
+    
+    senseHatWrapper = SenseHatWrapper() 
     senseHatWrapper.setup()
     
-    senseHatWrapper.setStatusLED("yellow")
+    senseHatWrapper.setStatusLED("yellow") #status light (setting up, connecting etc,)
     
     servoController = ServoController(config.idle, config.freq)
     servoController.setup()
@@ -26,16 +27,15 @@ def main():
     distanceSensor = DistanceSensor(config.trigPin, config.echoPin)
     distanceSensor.setup()
     
-    mqttClient = MqttClient(servoController.setServoState, 
+    mqttClient = MqttClient(servoController.setServoState, #mqtt client setup, takes methods for message callbacks
                             senseHatWrapper.getReading,
                             streamManager.streamToggle,
-                            terminate,
                             config,
                             terminationEvent)
     
-    senseHatWrapper.setStatusLED("green")
+    senseHatWrapper.setStatusLED("green") #setup done
     
-    def terminate():
+    def terminate() -> None: #lazy nested function to deal with program termination
         print("Terminating...")
         senseHatWrapper.clear()
         servoController.clear()
@@ -46,7 +46,7 @@ def main():
         shutdown(debug=True)    
     
     try:
-        while not terminationEvent.is_set():
+        while not terminationEvent.is_set(): # "main loop", 
             if time.perf_counter() - servoController.lastUpdate >= servoController.executionTime:
                 servoController.setServoState(setIdle = True)
                 
@@ -55,16 +55,15 @@ def main():
             
             time.sleep(0.05) 
     
- 
-    
     except: 
         traceback.print_exc() 
         senseHatWrapper.setStatusLED("red")
-        terminate(None)
+        terminate()
         
     finally:
         terminate()
-
+    
+    terminate()
 
 if __name__ == "__main__":
     main()

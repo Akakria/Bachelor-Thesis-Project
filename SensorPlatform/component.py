@@ -2,6 +2,7 @@ from datetime import datetime
 
 
 class Component:
+    """Base class for sensors and actuator components"""
     
     def __init__(self) -> None:
         pass
